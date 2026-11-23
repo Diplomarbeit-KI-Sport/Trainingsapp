@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1c2026">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Training">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Algorithmus trifft Athletik – HIB Liebenau</title>
+<style>
+:root{--bg:#1c2026;--card:#272c34;--tx:#eef1f5;--mu:#9aa6b5;--bd:#3a414b;--ac:#3b82f6;--ok:#16a34a;--wa:#d97706;--hi:#dc2626;--lo:#60a5fa;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;border-top:5px solid var(--ac);background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.w{max-width:980px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:0}h2{font-size:1.05rem;margin:0 0 10px}
+.sub{color:var(--mu);font-size:.85rem}
+nav{display:flex;gap:6px;margin:14px 0;flex-wrap:wrap}
+nav button,.btn{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on,.btn.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.g{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.k{font-size:1.7rem;font-weight:700}.l{color:var(--mu);font-size:.8rem}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;color:#fff;font-size:.78rem}
+.sc{overflow-x:auto}
+label{display:block;font-size:.8rem;color:var(--mu)}
+input,select{width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+td,th{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left}
+.tip{border-left:4px solid var(--ac);padding:8px 12px;background:var(--bg);border-radius:6px;margin:6px 0}
+.hide{display:none}
+ul{padding-left:18px;margin:6px 0}
+input[type=checkbox]{width:auto;accent-color:var(--ac)}
+.wk{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.ses{border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--bg)}
+.ses.done{opacity:.6}
+.sh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ck{display:flex;align-items:center;gap:8px;color:var(--tx);font-size:.95rem;cursor:pointer}
+.warn{border-left-color:var(--wa)}
+.btn.s{padding:5px 10px;font-size:.82rem}
+.bar{height:8px;border-radius:99px;background:var(--bd);overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+@media print{nav,#pform,.btn,.ck input{display:none!important}body{background:#fff}.c,.ses{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>Algorithmus trifft Athletik</h1>
+<div class="sub">Prototyp: KI-gestützte Trainingssteuerung · HIB Liebenau Graz</div>
+<nav id="nav"></nav>
+
+<section id="t-dash">
+ <div class="g" id="kpis"></div>
+ <div class="c" id="today" style="margin-top:12px"></div>
+ <div class="c"><div class="wk"><h2 id="ch1t" style="margin:0"></h2></div><div class="sc" id="ch1"></div></div>
+ <div class="c"><h2>Akut:Chronisch-Verhältnis (ACWR) – grüner Bereich 0,8–1,3</h2><div class="sc" id="ch2"></div></div>
+ <div class="c"><h2>Analyse</h2><div id="ana"></div></div>
+</section>
+
+<section id="t-log" class="hide">
+ <div class="c"><h2>Training erfassen</h2>
+ <div class="g">
+  <div><label for="fp">Einheit aus dem Trainingsplan (optional)</label><select id="fp"><option value="">– frei erfassen –</option></select></div>
+  <div><label for="fd">Datum</label><input type="date" id="fd"></div>
+  <div><label for="ft">Art der Einheit</label><select id="ft"><option>Ausdauer</option><option>Kraft</option><option>Intervalle</option><option>Technik</option><option>Wettkampf</option><option>Regeneration</option></select></div>
+  <div><label>Dauer (Min.)</label><input type="number" id="fm" value="60" min="5" max="400"></div>
+  <div><label>Anstrengung RPE (1–10)</label><input type="number" id="fr" value="6" min="1" max="10"></div>
+  <div><label>Schlaf (Std.)</label><input type="number" id="fs" value="7.5" step="0.5" min="2" max="12"></div>
+  <div><label>Befinden (1–5)</label><input type="number" id="fw" value="3" min="1" max="5"></div>
+ </div>
+ <p><button class="btn p" id="add">Speichern</button> <button class="btn" id="demo">Demodaten laden</button> <button class="btn" id="clr">Alle löschen</button></p>
+ <p><button class="btn" id="exp">Daten exportieren</button> <button class="btn" id="imp">Daten importieren</button><input type="file" id="impf" accept=".json,application/json" class="hide"></p>
+ <p class="sub" id="msg" role="status"></p></div>
+ <div class="c sc"><h2>Letzte Einträge</h2><table id="tb"></table></div>
+</section>
+
+<section id="t-prof" class="hide">
+ <div class="c"><h2>Dein Profil</h2>
+  <div class="g">
+   <div><label for="pa">Alter (Jahre)</label><input type="number" id="pa" min="10" max="90" inputmode="numeric" placeholder="z. B. 16"></div>
+   <div><label for="ph">Körpergröße (cm)</label><input type="number" id="ph" min="120" max="230" inputmode="numeric" placeholder="z. B. 172"></div>
+   <div><label for="ps">Geschlecht</label><select id="ps"><option value="">Bitte wählen</option><option value="w">weiblich</option><option value="m">männlich</option><option value="d">divers</option></select></div>
+   <div><label for="pw">Gewicht (kg)</label><input type="number" id="pw" min="30" max="250" step="0.1" inputmode="decimal" placeholder="z. B. 64"></div>
+  </div>
+  <p><button class="btn p" id="psave">Profil speichern</button> <button class="btn" id="pclr">Profil löschen</button></p>
+  <p class="sub" id="pmsg" role="status"></p></div>
+ <div class="g" id="pk"></div>
+ <div id="pnote"></div>
+</section>
+
+<section id="t-plan" class="hide">
+ <div class="c" id="pform"><h2>4-Wochen-Trainingsplan erstellen</h2>
+  <div class="g">
+   <div><label for="goal">Trainingsziel</label><select id="goal"><option value="fitness">Allgemeine Fitness</option><option value="ausdauer">Ausdauer</option><option value="kraft">Kraft</option></select></div>
+   <div><label for="lvl">Fitnessniveau</label><select id="lvl"><option value="anf">Einsteiger:in</option><option value="fort">Fortgeschritten</option><option value="sehr">Sehr fit</option></select></div>
+   <div><label for="npw">Einheiten pro Woche (max. 3)</label><select id="npw"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option></select></div>
+   <div><label for="pstart">Startdatum</label><input type="date" id="pstart"></div>
+  </div>
+  <p><button class="btn p" id="gen">Plan erstellen</button> <button class="btn" id="pprint">Plan drucken</button></p></div>
+ <div id="plan"></div>
+</section>
+
+<section id="t-info" class="hide">
+ <div class="c"><h2>Einfach erklärt</h2>
+ <div class="tip"><b>Trainingslast:</b> Wie viel du dir mit einer Einheit „aufgeladen“ hast. Je länger und anstrengender, desto höher.</div>
+ <div class="tip"><b>RPE (Anstrengung):</b> Wie hart sich das Training angefühlt hat, von 1 (sehr leicht) bis 10 (maximal).</div>
+ <div class="tip"><b>Tageslast und Wochenlast:</b> Die Lasten aller Einheiten eines Tages bzw. der letzten 7 Tage zusammengezählt.</div>
+ <div class="tip"><b>Chronische Last (Ø pro Woche):</b> Dein „normales Niveau“, also was dein Körper in den letzten 4 Wochen im Schnitt pro Woche gewohnt ist.</div>
+ <div class="tip"><b>ACWR:</b> Vergleicht diese Woche mit deinem Normalniveau. 1,0 heißt „wie gewohnt“. Liegt der Wert deutlich darüber, steigerst du zu schnell und das Verletzungsrisiko steigt. Grüner Bereich: 0,8 bis 1,3.</div>
+ <div class="tip"><b>Befinden:</b> Wie du dich fühlst, von 1 (sehr schlecht, erschöpft) bis 5 (sehr gut, fit und ausgeruht).</div>
+ <div class="tip"><b>Bereitschaft:</b> Ein Wert von 0 bis 100, wie erholt du für das nächste Training bist. Er entsteht aus Schlaf und Befinden der letzten 3 Tage.</div>
+ <div class="tip"><b>Maximalpuls und Pulsbereiche:</b> Der höchste Puls, den dein Herz erreichen kann (geschätzt aus Alter und Geschlecht). Leichte Ausdauer liegt bei etwa 65–75 % davon, harte Intervalle bei 85–92 %.</div>
+ <div class="tip"><b>BMI:</b> Verhältnis von Gewicht zu Körpergröße. Er ist nur ein grober Richtwert und sagt nichts über Muskeln oder Fitness.</div>
+ <div class="tip"><b>Entlastungswoche:</b> In Woche 4 trainierst du bewusst weniger, damit sich der Körper erholt und das Training „wirken“ kann.</div>
+ <div class="tip"><b>Erklärbare KI:</b> Die App sagt dir bei jedem Plan, warum sie etwas empfiehlt. Die Regeln sind nachvollziehbar, nicht versteckt.</div>
+</div>
+<div class="c"><h2>Rechenwege</h2>
+ <div class="sc"><table>
+ <tr><th>Wert</th><th>Rechnung</th><th>Beispiel</th></tr>
+ <tr><td>Trainingslast einer Einheit</td><td>Dauer (Min.) × RPE</td><td>60 × 6 = 360</td></tr>
+ <tr><td>Tageslast</td><td>Summe aller Einheiten des Tages</td><td>360 + 120 = 480</td></tr>
+ <tr><td>Wochenlast</td><td>Summe der Tageslasten der letzten 7 Tage</td><td>480 + 360 + 210 = 1 050</td></tr>
+ <tr><td>Chronische Last (Ø pro Woche)</td><td>Summe der letzten 28 Tage ÷ 4</td><td>4 000 ÷ 4 = 1 000</td></tr>
+ <tr><td>ACWR</td><td>Wochenlast ÷ chronische Last</td><td>1 050 ÷ 1 000 = 1,05 (optimal)</td></tr>
+ <tr><td>Bereitschaft</td><td>Schlaf-Punkte: Schlaf ÷ 8 × 50 (höchstens 50)<br>Befinden-Punkte: Befinden ÷ 5 × 50<br>Beides addieren (Ø der letzten 3 Tage), bei ACWR &gt; 1,5 minus 15</td><td>Schlaf 7 h: 43,75<br>Befinden 4: 40<br>Summe 83,75 → 84</td></tr>
+ <tr><td>Maximalpuls</td><td>Frauen: 206 − 0,88 × Alter (Gulati)<br>Männer und divers: 208 − 0,7 × Alter (Tanaka)</td><td>Mann, 16 Jahre: 208 − 0,7 × 16 = 196,8 → 197<br>Frau, 16 Jahre: 206 − 0,88 × 16 = 191,9 → 192</td></tr>
+ <tr><td>Pulsbereich</td><td>Maximalpuls × Prozentwert</td><td>197 × 0,65 = 128 bis 197 × 0,75 = 148</td></tr>
+ <tr><td>BMI</td><td>Gewicht (kg) ÷ (Größe in m)²</td><td>64 ÷ 1,72² = 21,6</td></tr>
+ <tr><td>Energieverbrauch</td><td>MET × Gewicht (kg) × Dauer (Std.)</td><td>6 × 64 × 0,5 = 192 kcal</td></tr>
+ <tr><td>Steigerung im Plan</td><td>Woche 1: 100 %, Woche 2: 110 %, Woche 3: 120 %, Woche 4: 70 %<br>(ab 50 Jahren: 100 / 105 / 110 / 70 %)<br>Ausdauerdauer = Basisminuten (30 / 40 / 50 je nach Niveau) × Faktor, auf 5 Min. gerundet</td><td>30 Min. × 1,2 = 36 → 35 Min.</td></tr>
+ <tr><td>Anpassung an deine Daten</td><td>ACWR &gt; 1,5: × 0,7<br>ACWR &gt; 1,3: × 0,85<br>Bereitschaft &lt; 50: zusätzlich × 0,9</td><td>40 Min. × 0,85 = 34 → 35 Min.</td></tr>
+ <tr><td>Dauer anderer Einheiten</td><td>Kraft: 10 + 5 Übungen × Sätze × 2 Min.<br>Intervalle: 10 + Runden × 5 + 5 Min.</td><td>Kraft, 3 Sätze: 10 + 5 × 3 × 2 = 40 Min.</td></tr>
+ </table></div>
+ <p class="sub">ACWR-Bereiche: unter 0,8 unterbelastet · 0,8 bis 1,3 optimal · 1,3 bis 1,5 erhöht · über 1,5 Überlastungsrisiko. Die Last-Methode (Dauer × RPE) stammt von Foster („Session-RPE“).</p>
+</div>
+ <div class="g">
+  <div class="c"><h2>Chancen</h2><ul><li>Individuelle, datenbasierte Steuerung</li><li>Frühwarnung bei Überlastung</li><li>Zeitersparnis für Trainer:innen</li></ul></div>
+  <div class="c"><h2>Risiken</h2><ul><li>Fehlerhafte oder geschönte Eingaben</li><li>Blindes Vertrauen in Empfehlungen</li><li>Leistungsdruck durch Überwachung</li></ul></div>
+  <div class="c"><h2>Recht &amp; Ethik</h2><ul><li>Alter, Geschlecht, Größe und Gewicht sind personenbezogene Daten (teils Gesundheitsdaten), besonders geschützt (DSGVO Art. 9) – Einwilligung nötig, bei Minderjährigen auch der Eltern</li><li>Datenminimierung, Löschrecht</li><li>EU-KI-Verordnung: Transparenz, menschliche Aufsicht</li><li>Trainer:in entscheidet, nicht die KI</li></ul></div>
+ </div>
+ <p class="sub">Hinweis: Prototyp ohne medizinische Aussagekraft. Daten bleiben ausschließlich lokal im Browser.</p>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const TABS=[['dash','Dashboard'],['prof','Profil'],['plan','Trainingsplan'],['log','Training erfassen'],['info','Konzept &amp; Ethik']];
+let E=[],PR=null,PL=null;const CS='2026-11-25';
+try{E=JSON.parse(localStorage.getItem('ts_entries')||'[]')}catch(e){E=[]}
+try{PR=JSON.parse(localStorage.getItem('ts_profile')||'null')}catch(e){PR=null}
+try{PL=JSON.parse(localStorage.getItem('ts_plan')||'null')}catch(e){PL=null}
+const save=()=>{try{localStorage.setItem('ts_entries',JSON.stringify(E))}catch(e){}};
+const saveP=()=>{try{PR?localStorage.setItem('ts_profile',JSON.stringify(PR)):localStorage.removeItem('ts_profile')}catch(e){}};
+const savePL=()=>{try{PL?localStorage.setItem('ts_plan',JSON.stringify(PL)):localStorage.removeItem('ts_plan')}catch(e){}};
+const validP=p=>!!p&&[p.age,p.h,p.w].every(v=>typeof v==='number'&&isFinite(v))&&p.age>=10&&p.age<=90&&p.h>=120&&p.h<=230&&p.w>=30&&p.w<=250&&(p.sex===undefined||['w','m','d'].includes(p.sex));
+if(!validP(PR))PR=null;
+if(!(PL&&Array.isArray(PL.weeks)&&PL.weeks.length===4&&Array.isArray(PL.why)))PL=null;
+if(PL&&PL.weeks.some(w=>w.sessions.some(x=>x.kind==='Zirkel')))PL=null;
+const iso=d=>d.toISOString().slice(0,10);
+const off=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+n);return d};
+const ld=e=>e.min*e.rpe;
+function daily(n,end=0){const a=[];for(let i=n-1;i>=0;i--){const k=iso(off(end-i));a.push({k,v:E.filter(e=>e.d===k).reduce((s,e)=>s+ld(e),0)})}return a}
+const sum=a=>a.reduce((s,x)=>s+x,0);
+function acwrAt(end){const d=daily(28,end).map(x=>x.v);const ac=sum(d.slice(21)),ch=sum(d)/4;return ch>0?ac/ch:null}
+function metrics(){
+ const d7=daily(7).map(x=>x.v),m=sum(d7)/7,sd=Math.sqrt(sum(d7.map(x=>(x-m)**2))/7);
+ const mono=sd>0?m/sd:0,week=sum(d7),chronic=sum(daily(28).map(x=>x.v))/4;
+ const acwr=chronic>0?week/chronic:null;
+ const r=E.filter(e=>e.d>=iso(off(-2)));let rd=null;
+ if(r.length){const s=sum(r.map(e=>e.sleep))/r.length,w=sum(r.map(e=>e.well))/r.length;
+  rd=Math.min(50,s/8*50)+w/5*50;if(acwr>1.5)rd-=15;rd=Math.max(0,Math.round(rd))}
+ return{week,chronic,acwr,mono,strain:week*mono,rd}}
+function zone(a){if(a==null)return['Keine Daten','#888'];
+ if(a<.8)return['Unterbelastet','var(--lo)'];if(a<=1.3)return['Optimal','var(--ok)'];
+ if(a<=1.5)return['Erhöht','var(--wa)'];return['Überlastungsrisiko','var(--hi)']}
+const f=(x,n=2)=>x==null?'–':x.toFixed(n).replace('.',',');
+
+function chartDays(){const st=new Date(CS+'T12:00:00'),a=[];
+ for(let i=0;i<28;i++){const d=new Date(st);d.setDate(d.getDate()+i);const k=iso(d);a.push({k,v:E.filter(e=>e.d===k).reduce((t,e)=>t+ld(e),0)})}return a}
+function bars(data){const W=700,H=180,p=28,bw=(W-p)/data.length,mx=Math.max(1,...data.map(x=>x.v));
+ let s=`<svg viewBox="0 0 ${W} ${H+20}" style="min-width:560px;width:100%"><line x1="${p}" y1="${H}" x2="${W}" y2="${H}" stroke="var(--bd)"/>`;
+ data.forEach((x,i)=>{const h=x.v/mx*(H-10);s+=`<rect x="${p+i*bw+1}" y="${H-h}" width="${bw-2}" height="${h}" rx="2" fill="var(--ac)"/>`;
+  if(i%7==0)s+=`<text x="${p+i*bw}" y="${H+14}" font-size="10" fill="var(--mu)">${x.k.slice(8)}.${x.k.slice(5,7)}.</text>`});
+ return s+`<text x="2" y="12" font-size="10" fill="var(--mu)">${mx}</text></svg>`}
+function line(){const W=700,H=170,p=28,pts=[];for(let i=27;i>=0;i--)pts.push(acwrAt(-i));
+ const mx=2,y=v=>H-Math.min(v,mx)/mx*(H-10),bw=(W-p)/27;
+ let s=`<svg viewBox="0 0 ${W} ${H+20}" style="min-width:560px;width:100%"><rect x="${p}" y="${y(1.3)}" width="${W-p}" height="${y(.8)-y(1.3)}" fill="var(--ok)" opacity=".15"/>`;
+ [0,.8,1.3,1.5,2].forEach(v=>s+=`<text x="2" y="${y(v)+3}" font-size="10" fill="var(--mu)">${f(v,1)}</text>`);
+ let d='';pts.forEach((v,i)=>{if(v!=null)d+=(d?'L':'M')+(p+i*bw)+' '+y(v)});
+ return s+`<path d="${d}" fill="none" stroke="var(--ac)" stroke-width="2.5"/></svg>`}
+
+function dash(){const m=metrics(),z=zone(m.acwr);
+ const rdz=m.rd==null?'#888':m.rd>=70?'var(--ok)':m.rd>=50?'var(--wa)':'var(--hi)';
+ $('#kpis').innerHTML=`
+ <div class="c"><div class="l">Wochenlast (7 Tage)</div><div class="k">${Math.round(m.week)}</div><div class="l">Ø chronisch ${Math.round(m.chronic)}/Woche</div></div>
+ <div class="c"><div class="l">ACWR</div><div class="k">${f(m.acwr)}</div><span class="tag" style="background:${z[1]}">${z[0]}</span></div>
+ <div class="c"><div class="l">Bereitschaft (0–100)</div><div class="k" style="color:${rdz}">${m.rd??'–'}</div><div class="l">Schlaf &amp; Befinden</div></div>`;
+ todayCard();
+const cd=chartDays(),dm=k=>k.slice(8)+'.'+k.slice(5,7)+'.';
+ $('#ch1t').textContent=`Tageslast ${dm(cd[0].k)} – ${dm(cd[27].k)} (4 Wochen, sRPE = Dauer × RPE)`;
+ $('#ch1').innerHTML=bars(cd);$('#ch2').innerHTML=line();
+ const t=[];
+ if(!E.length)t.push('Noch keine Daten – erfasse Trainings oder lade Demodaten im Tab „Training erfassen“.');
+ else{
+  if(m.acwr>1.5)t.push('ACWR über 1,5: Die Belastung stieg zu schnell. Empfehlung: Umfang diese Woche deutlich reduzieren.');
+  else if(m.acwr>1.3)t.push('ACWR leicht erhöht: Last nicht weiter steigern, Regenerationseinheiten einplanen.');
+  else if(m.acwr<.8)t.push('Unterbelastung: Es ist Spielraum für eine schrittweise Steigerung vorhanden.');
+  else t.push('Belastungsaufbau im optimalen Bereich.');
+  if(m.rd!=null&&m.rd<50)t.push('Niedrige Bereitschaft: Schlaf und Erholung prüfen, Intensität zurücknehmen.');
+ }
+ $('#ana').innerHTML=t.map(x=>`<div class="tip">${x}</div>`).join('')}
+
+function table(){const l=[...E].sort((a,b)=>b.d.localeCompare(a.d)).slice(0,10);
+ $('#tb').innerHTML='<tr><th>Datum</th><th>Art</th><th>Min</th><th>RPE</th><th>Last</th><th>Schlaf</th><th>Befinden</th><th></th></tr>'+
+ l.map(e=>`<tr><td>${e.d}</td><td>${e.type}</td><td>${e.min}</td><td>${e.rpe}</td><td>${ld(e)}</td><td>${e.sleep}</td><td>${e.well}</td><td><button class="btn" data-id="${e.id}">✕</button></td></tr>`).join('')}
+
+/* ---------- Profil ---------- */
+const bmi=p=>p.w/((p.h/100)**2);
+const hfmax=p=>p.sex==='w'?Math.round(206-0.88*p.age):Math.round(208-0.7*p.age);
+const hfForm=p=>p.sex==='w'?`206 − 0,88 × ${p.age} (Gulati, für Frauen)`:`208 − 0,7 × ${p.age} (Tanaka)`;
+const zr=(p,a,b)=>Math.round(hfmax(p)*a)+'–'+Math.round(hfmax(p)*b);
+function bmiCat(p){const b=bmi(p);
+ if(p.age<18)return'Richtwert – bei unter 18 wird der BMI über altersabhängige Perzentile bewertet';
+ return b<18.5?'Untergewicht':b<25?'Normalbereich':b<30?'Übergewicht':'Adipositas-Bereich'}
+function profView(){
+ if(PR){$('#pa').value=PR.age;$('#ph').value=PR.h;$('#pw').value=PR.w;$('#ps').value=PR.sex||''}
+ if(!PR){$('#pk').innerHTML='';$('#pnote').innerHTML='';return}
+ $('#pk').innerHTML=`
+ <div class="c"><div class="l">BMI</div><div class="k">${f(bmi(PR),1)}</div><div class="l">${bmiCat(PR)}</div></div>
+ <div class="c"><div class="l">Maximalpuls (geschätzt)</div><div class="k">${hfmax(PR)}</div><div class="l">Schläge/Min. (${PR.sex==='w'?'Gulati':'Tanaka'})</div></div>
+ <div class="c"><div class="l">Grundlagenbereich</div><div class="k">${zr(PR,.65,.75)}</div><div class="l">65–75 % HFmax</div></div>
+ <div class="c"><div class="l">Intensivbereich</div><div class="k">${zr(PR,.85,.92)}</div><div class="l">85–92 % HFmax</div></div>`;
+ $('#pnote').innerHTML='<div class="tip">Alle Werte sind Schätzungen ohne medizinische Aussagekraft. Bei Beschwerden, Vorerkrankungen oder Unsicherheit: erst ärztlich abklären lassen.</div>'}
+
+/* ---------- Plan-Generator ---------- */
+const WLAB=['Woche 1 – Einstieg','Woche 2 – Steigerung','Woche 3 – Belastungsspitze','Woche 4 – Entlastung'];
+const KCOL={Ausdauer:'#2563eb',Intervalle:'#0ea5e9',Kraft:'#475569'};
+const TYPEMAP={Ausdauer:'Ausdauer',Intervalle:'Intervalle',Kraft:'Kraft'};
+const TPL={
+ ausdauer:{1:['grund'],2:['grund','intervall'],3:['grund','intervall','kraftGK']},
+ kraft:{1:['kraftGK'],2:['kraftA','kraftB'],3:['kraftA','grundkurz','kraftB']},
+ fitness:{1:['kraftGK'],2:['kraftGK','grund'],3:['kraftGK','grund','intervall']}};
+const DAYS={1:[2],2:[1,4],3:[0,2,4]};
+const r5=x=>Math.round(x/5)*5;
+
+function buildPlan(o){
+ const p=PR,young=p.age<18,senior=p.age>=50,b=bmi(p),heavy=!young&&b>=30,li={anf:0,fort:1,sehr:2}[o.level];
+ const F=senior?[1,1.05,1.1,.7]:[1,1.1,1.2,.7],why=[];let adj=1;
+ const m=metrics(),chronic=E.length?m.chronic:0;
+ why.push(`Maximalpuls: ${hfForm(p)} = ${hfmax(p)}/Min. Daraus ergeben sich die Pulsbereiche der Ausdauereinheiten.`);
+ why.push(`BMI ${f(b,1)} (${bmiCat(p)}). Gewicht ${f(p.w,1)} kg fließt in die Schätzung des Energieverbrauchs ein.`);
+ if(young)why.push('Unter 18: Technik vor Gewicht, höhere Wiederholungszahlen (12–15), keine Maximalversuche.');
+ if(senior)why.push('Ab 50: langsamere Steigerung (+5 % / +10 % statt +10 % / +20 %) und etwas niedrigere Intensität bei den intensiven Einheiten.');
+ if(heavy)why.push('BMI ≥ 30: gelenkschonende Ausdauerformen (Rad, Schwimmen, zügiges Gehen) statt Laufen.');
+ if(E.length&&m.acwr!=null){
+  if(m.acwr>1.5){adj*=.7;why.push(`ACWR ${f(m.acwr)} &gt; 1,5 → gesamter Plan um 30 % reduziert.`)}
+  else if(m.acwr>1.3){adj*=.85;why.push(`ACWR ${f(m.acwr)} erhöht → gesamter Plan um 15 % reduziert.`)}
+  else why.push(`ACWR ${f(m.acwr)} → keine Reduktion nötig.`);
+  if(m.rd!=null&&m.rd<50){adj*=.9;why.push(`Bereitschaft ${m.rd} &lt; 50 → zusätzlich −10 %.`)}
+ }else why.push('Noch keine Trainingsdaten erfasst – der Plan basiert nur auf Profil und Fitnessniveau. Mit erfassten Einheiten passt er sich an ACWR und Bereitschaft an.');
+ why.push(`${o.n} Einheit${o.n>1?'en':''} pro Woche (Maximum: 3) mit Ruhetagen dazwischen. Die Anpassung des Körpers passiert in der Erholung. 3 Wochen Steigerung (100 % → ${Math.round(F[1]*100)} % → ${Math.round(F[2]*100)} %), Woche 4 als Entlastung (70 %).`);
+ const base=[30,40,50][li],reps=young||o.goal==='fitness'?'12–15':o.goal==='kraft'?'8–12':'10–12';
+ const ZL=zr(p,.65,.75),ZR=zr(p,.6,.7),ZI=senior?zr(p,.8,.88):zr(p,.85,.92);
+ const act=heavy?'Radfahren, Schwimmen oder zügiges Gehen':'Laufen, Radfahren oder Schwimmen';
+
+ const mk=(kind,w)=>{
+  const sets=Math.max(2,[[2,3,3,2],[3,3,4,2],[3,4,4,3]][li][w]-(adj<1?1:0)),hold=[20,30,40,20][w]+10*li;
+  const krpe=[6,6,7,5][w];
+  const S=n=>`${n} × ${reps}`,H=`${sets} × ${hold} s`;
+  if(kind==='grund'||kind==='grundkurz'){
+   const k=kind==='grund'?1:.7,min=r5(base*k*F[w]*adj);
+   return{kind:'Ausdauer',title:kind==='grund'?'Ausdauer (Grundlage)':'Lockere Ausdauer',min,rpe:[4,4,5,3][w],met:heavy?5:6,
+    hr:kind==='grund'?ZL:ZR,ex:[`${min} Min. ${act} im gleichmäßigen Tempo`,'Du solltest dich dabei noch unterhalten können.'+(li===0&&!heavy?' Lauf-Geh-Wechsel ist erlaubt.':'')]}}
+  if(kind==='intervall'){
+   const rounds=Math.max(2,[[3,4,4,2],[4,5,6,3],[5,6,7,4]][li][w]-(adj<1?1:0));
+   return{kind:'Intervalle',title:'Intervalle',min:10+rounds*5+5,rpe:w===3?6:7,met:8,hr:ZI,
+    ex:['10 Min. Aufwärmen (locker, Puls '+ZR+')',`${rounds} × 3 Min. zügig (Puls ${ZI}) + 2 Min. locker zur Erholung – ${act}`,'5 Min. Ausklingen und Dehnen']}}
+  const warm='10 Min. Aufwärmen und Mobilisieren';
+  const K={
+   kraftA:{t:'Kraft – Unterkörper & Rumpf',ex:[`Kniebeugen ${S(sets)}`,`Ausfallschritte ${S(sets)} (je Seite)`,`Glute Bridge ${S(sets)}`,`Wadenheben ${S(sets)}`,`Plank ${H}`]},
+   kraftB:{t:'Kraft – Oberkörper & Rumpf',ex:[`Liegestütze ${S(sets)} (ggf. auf Knien)`,`Rudern mit Rucksack oder Gummiband ${S(sets)}`,`Schulterdrücken mit Flaschen oder Kurzhanteln ${S(sets)}`,`Superman ${S(sets)}`,`Seitstütz ${H} (je Seite)`]},
+   kraftGK:{t:'Kraft – Ganzkörper',ex:[`Kniebeugen ${S(sets)}`,`Liegestütze ${S(sets)} (ggf. auf Knien)`,`Rudern mit Rucksack oder Gummiband ${S(sets)}`,`Glute Bridge ${S(sets)}`,`Plank ${H}`]}}[kind];
+  return{kind:'Kraft',title:K.t,min:r5(10+K.ex.length*sets*2),rpe:krpe,met:4.5,hr:null,
+   ex:[warm,...K.ex,`60–90 s Pause zwischen den Sätzen. Die letzten 2 Wiederholungen sollen anstrengend, aber sauber ausführbar sein.`]}};
+
+ const start=new Date(o.start+'T12:00:00'),weeks=[];
+ for(let w=0;w<4;w++){
+  const ss=TPL[o.goal][o.n].map((kind,i)=>{
+   const s=mk(kind,w),d=new Date(start);d.setDate(d.getDate()+w*7+DAYS[o.n][i]);
+   s.date=iso(d);s.kcal=Math.round(s.met*p.w*s.min/60);s.done=false;delete s.met;return s});
+  weeks.push({label:WLAB[w],load:sum(ss.map(s=>s.min*s.rpe)),sessions:ss})}
+ return{created:iso(off(0)),o,age:p.age,weeks,why,chronic:Math.round(chronic)}}
+
+const fdate=d=>new Date(d+'T12:00:00').toLocaleDateString('de-AT',{weekday:'short',day:'2-digit',month:'2-digit'});
+function sesHTML(s,wi,si){
+ const art=TYPEMAP[s.kind]||'Kraft';
+ return `<div class="ses${s.done?' done':''}"><div class="sh"><label class="ck"><input type="checkbox" data-done="${wi},${si}" ${s.done?'checked':''}> <b>${fdate(s.date)}</b></label><span class="tag" style="background:${KCOL[s.kind]||'#666'}">${s.title}</span></div>
+   <div class="sub">Art der Einheit (Training erfassen): <b>${art}</b></div>
+   <div class="sub">${s.min} Min. · RPE ${s.rpe} · Last ${s.min*s.rpe} · ≈ ${s.kcal} kcal${s.hr?' · Puls '+s.hr+'/Min.':''}</div>
+   <ul>${s.ex.map(x=>`<li>${x}</li>`).join('')}</ul>
+   <button class="btn s" data-log="${wi},${si}">Ins Protokoll übernehmen</button></div>`}
+function planSessions(){return PL?PL.weeks.flatMap((w,wi)=>w.sessions.map((s,si)=>({s,wi,si}))):[]}
+function todayCard(){
+ const t=iso(off(0)),ps=planSessions(),cur=ps.filter(x=>x.s.date===t),logged=E.filter(e=>e.d===t);
+ let h='<h2>Heutige Einheit</h2>';
+ if(cur.length)h+=cur.map(x=>sesHTML(x.s,x.wi,x.si)).join('');
+ else if(!PL)h+='<p class="sub">Noch kein Trainingsplan vorhanden.</p><button class="btn p" data-act="plan">Plan erstellen</button>';
+ else{const nx=ps.filter(x=>x.s.date>t&&!x.s.done)[0];
+  h+='<p class="sub">Heute ist laut Plan keine Einheit vorgesehen (Ruhetag).'+(nx?' Nächste Einheit: <b>'+fdate(nx.s.date)+' – '+nx.s.title+'</b>.':'')+'</p>'}
+ if(logged.length)h+='<div class="tip">Heute erfasst: '+logged.map(e=>`${e.type}, ${e.min} Min., RPE ${e.rpe} (Last ${ld(e)})`).join(' · ')+'</div>';
+ $('#today').innerHTML=h}
+function fillPlanSel(){
+ const sel=$('#fp'),keep=sel.value;
+ sel.innerHTML='<option value="">– frei erfassen –</option>'+planSessions().filter(x=>!x.s.done).map(x=>`<option value="${x.wi},${x.si}">${fdate(x.s.date)} · ${x.s.title}</option>`).join('');
+ sel.value=[...sel.options].some(o=>o.value===keep)?keep:''}
+function applyPlanSel(v){
+ if(!v)return;const[w,i]=v.split(',').map(Number),s=PL.weeks[w].sessions[i];
+ $('#fd').value=s.date;$('#ft').value=TYPEMAP[s.kind]||'Kraft';$('#fm').value=s.min;$('#fr').value=s.rpe}
+function planView(){
+ $('#pform').classList.toggle('hide',!PR);
+ const box=$('#plan');
+ if(!PR){box.innerHTML='<div class="c"><h2>Profil fehlt</h2><p>Für einen persönlichen Plan brauche ich Alter, Körpergröße und Gewicht.</p><button class="btn p" data-act="prof">Profil ausfüllen</button></div>';return}
+ if(!PL){box.innerHTML='<div class="c sub">Wähle Ziel, Niveau und Einheiten pro Woche und klicke auf „Plan erstellen“.</div>';return}
+ $('#goal').value=PL.o.goal;$('#lvl').value=PL.o.level;$('#npw').value=PL.o.n;$('#pstart').value=PL.o.start;
+ const all=PL.weeks.flatMap(w=>w.sessions),dn=all.filter(s=>s.done).length;
+ let h=`<div class="c"><h2>${PL.o.n} Einheit${PL.o.n>1?'en':''}/Woche · 4 Wochen · ${all.length} Einheiten</h2>
+  <div class="bar"><i style="width:${Math.round(dn/all.length*100)}%"></i></div><div class="sub">${dn} von ${all.length} erledigt</div></div>`;
+ PL.weeks.forEach((w,wi)=>{
+  const hot=PL.chronic>0&&w.load>PL.chronic*1.3;
+  h+=`<div class="c"><div class="wk"><h2 style="margin:0">${w.label}</h2><span class="sub">Wochenlast ${w.load}${PL.chronic?' (bisher Ø '+PL.chronic+')':''}</span></div>`;
+  if(hot)h+='<div class="tip warn">Diese Woche liegt mehr als 30 % über deiner bisherigen Wochenlast. Steigere vorsichtig und achte auf Erholung.</div>';
+  w.sessions.forEach((s,si)=>{h+=sesHTML(s,wi,si)});
+  h+='</div>'});
+ h+=`<div class="c"><h2>Begründung (Erklärbarkeit)</h2>${PL.why.map(x=>`<div class="tip">${x}</div>`).join('')}
+  <p class="sub">Vorschlag ohne medizinische Aussagekraft – bei Beschwerden abbrechen und ärztlich abklären. Die endgültige Entscheidung liegt bei dir bzw. bei der Trainerin / dem Trainer.</p></div>`;
+ box.innerHTML=h}
+
+function demo(){E=[];let s=7;const r=()=>(s=(s*9301+49297)%233280)/233280;
+ const ty=['Ausdauer','Kraft','Intervalle','Technik'],t0=off(0).getTime();
+ for(let j=-28;j<28;j++){const d=new Date(CS+'T12:00:00');d.setDate(d.getDate()+j);const dow=d.getDay();
+  if(dow===0||(dow===3&&r()<.6))continue;
+  const dt=Math.round((d.getTime()-t0)/864e5),ramp=dt>-7&&dt<=0?1.35:1,hard=r()<.35,rpe=Math.round(hard?7+r()*2:4+r()*2);
+  E.push({id:'d'+j,d:iso(d),type:ty[Math.floor(r()*4)],min:Math.round((45+r()*50)*ramp/5)*5,rpe,sleep:+(6+r()*2.5).toFixed(1),well:Math.max(1,Math.min(5,Math.round(2+r()*3)))})}
+ save();render()}
+
+function render(){dash();table()}
+$('#nav').innerHTML=TABS.map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join('');
+function showTab(t){
+ TABS.forEach(x=>{$('#t-'+x[0]).classList.toggle('hide',x[0]!==t)});
+ [...$('#nav').children].forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ if(t==='dash')dash();if(t==='plan')planView();if(t==='prof')profView();if(t==='log')fillPlanSel();window.scrollTo(0,0)}
+$('#nav').onclick=e=>{const t=e.target.dataset.t;if(t)showTab(t)};
+showTab('dash');
+$('#pstart').value=iso(off(1));
+$('#psave').onclick=()=>{
+ const p={age:Math.round(+$('#pa').value),h:Math.round(+$('#ph').value),w:Math.round(+$('#pw').value*10)/10,sex:$('#ps').value};
+ if(!validP(p)||!p.sex){$('#pmsg').textContent='Bitte alle Felder ausfüllen: Alter 10–90, Geschlecht, Größe 120–230 cm, Gewicht 30–250 kg.';return}
+ PR=p;saveP();PL=null;savePL();profView();
+ $('#pmsg').textContent='Profil gespeichert. Ein bestehender Plan wurde verworfen, bitte neu erstellen.'};
+$('#pclr').onclick=()=>{PR=null;PL=null;saveP();savePL();['#pa','#ph','#pw','#ps'].forEach(s=>$(s).value='');profView();$('#pmsg').textContent='Profil und Plan gelöscht.'};
+$('#gen').onclick=()=>{
+ if(!PR){planView();return}
+ const n=Math.min(3,Math.max(1,+$('#npw').value||3)),start=$('#pstart').value||iso(off(1));
+ PL=buildPlan({goal:$('#goal').value,level:$('#lvl').value,n,start});savePL();planView()};
+$('#pprint').onclick=()=>window.print();
+function planClick(e){const t=e.target;
+ if(t.dataset.act==='prof')return showTab('prof');
+ if(t.dataset.act==='plan')return showTab('plan');
+ if(t.dataset.done){const[w,i]=t.dataset.done.split(',').map(Number);PL.weeks[w].sessions[i].done=t.checked;savePL();planView();dash();return}
+ if(t.dataset.log){showTab('log');$('#fp').value=t.dataset.log;applyPlanSel(t.dataset.log);
+  msg('Werte aus dem Plan übernommen. Ergänze Schlaf und Befinden und speichere.')}}
+$('#plan').onclick=planClick;$('#today').onclick=planClick;
+$('#fp').onchange=()=>applyPlanSel($('#fp').value);
+$('#fd').value=iso(off(0));
+$('#add').onclick=()=>{const pv=$('#fp').value;if(pv&&PL){const[w,i]=pv.split(',').map(Number);PL.weeks[w].sessions[i].done=true;savePL();$('#fp').value=''}
+ E.push({id:'u'+Date.now(),d:$('#fd').value,type:$('#ft').value,min:+$('#fm').value,rpe:+$('#fr').value,sleep:+$('#fs').value,well:+$('#fw').value});save();render();fillPlanSel();msg('Training gespeichert.')};
+$('#tb').onclick=e=>{const id=e.target.dataset.id;if(id){E=E.filter(x=>x.id!==id);save();render()}};
+$('#demo').onclick=demo;
+$('#clr').onclick=()=>{E=[];save();render()};
+const msg=t=>{$('#msg').textContent=t};
+const TYPES=['Ausdauer','Kraft','Intervalle','Technik','Wettkampf','Regeneration'];
+$('#exp').onclick=async()=>{
+ if(!E.length&&!PR){msg('Keine Daten zum Exportieren.');return}
+ const name='training-daten-'+iso(off(0))+'.json';
+ const blob=new Blob([JSON.stringify({app:'trainingssteuerung',version:1,exported:new Date().toISOString(),profile:PR,entries:E},null,1)],{type:'application/json'});
+ if(/iPhone|iPad|Android/.test(navigator.userAgent)){
+  try{const file=new File([blob],name,{type:'application/json'});
+   if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});msg('Export bereit: '+name);return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+ }
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);msg('Export gespeichert: '+name)};
+$('#imp').onclick=()=>$('#impf').click();
+$('#impf').onchange=async e=>{const fl=e.target.files[0];e.target.value='';if(!fl)return;
+ try{const j=JSON.parse(await fl.text());const arr=Array.isArray(j)?j:j.entries;if(!Array.isArray(arr))throw 0;
+  const ok=arr.filter(x=>x&&typeof x.id==='string'&&/^[\w-]{1,40}$/.test(x.id)&&/^\d{4}-\d{2}-\d{2}$/.test(x.d)&&TYPES.includes(x.type)&&[x.min,x.rpe,x.sleep,x.well].every(v=>typeof v==='number'&&isFinite(v)))
+   .map(x=>({id:x.id,d:x.d,type:x.type,min:x.min,rpe:x.rpe,sleep:x.sleep,well:x.well}));
+  const have=new Set(E.map(x=>x.id)),neu=ok.filter(x=>!have.has(x.id));
+  E=E.concat(neu);save();render();
+  let pm='';if(!Array.isArray(j)&&validP(j.profile)){PR={age:j.profile.age,h:j.profile.h,w:j.profile.w,sex:j.profile.sex};saveP();PL=null;savePL();pm=' Profil übernommen, Plan bitte neu erstellen.'}
+  msg(neu.length+' neue Einträge importiert, '+(ok.length-neu.length)+' schon vorhanden'+(arr.length>ok.length?', '+(arr.length-ok.length)+' ungültig':'')+'.'+pm)
+ }catch(err){msg('Datei konnte nicht gelesen werden.')}};
+render();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+</script>
+</body>
+</html>
